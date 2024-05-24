@@ -12,6 +12,8 @@ export class ItemsService {
     private readonly itemRepository: Repository<Item>,
   ) {}
 
+  private context: string = 'items';
+
   async create(createItemDto: CreateItemDto) {
     await this.itemRepository.insert({
       ...createItemDto,
@@ -32,11 +34,23 @@ export class ItemsService {
     return this.itemRepository.findOneBy({ id });
   }
 
-  update(id: number, updateItemDto: UpdateItemDto) {
-    return `This action updates a #${id} item`;
+  async update(id: number, updateItemDto: UpdateItemDto) {
+    const checkDataExist = await this.itemRepository.findOneBy({ id });
+
+    if (!checkDataExist) throw new Error(this.context);
+
+    return await this.itemRepository.update(id, {
+      ...updateItemDto,
+      update_by: 'Update ricki',
+      updated_client_id: '00101',
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} item`;
+  async remove(id: number) {
+    const checkDataExist = await this.itemRepository.findOneBy({ id });
+
+    if (!checkDataExist) throw new Error(this.context);
+
+    return await this.itemRepository.delete({ id });
   }
 }
